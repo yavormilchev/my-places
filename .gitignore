@@ -1,5 +1,11 @@
 # IDE
 .idea
+.vscode
+CLAUDE.md
+
+# Data
+*.takeout.zip
+uploads/
 
 # Logs
 logs
