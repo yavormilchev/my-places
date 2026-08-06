@@ -8,7 +8,7 @@ by radius and category.
 ## 1. What we're building
 
 | Feature             | Notes                                                      |
-|---------------------|------------------------------------------------------------|
+| ------------------- | ---------------------------------------------------------- |
 | Google sign-in      | Standard OAuth 2.0 authorization code flow                 |
 | Import saved places | Via Takeout file upload (v1) → Data Portability API (v2)   |
 | Radius filter       | "Show me saved places within X km of my current location"  |
@@ -44,12 +44,12 @@ Google's official OAuth-based export API. This is what your original idea descri
 **Two catches:**
 
 1. **Verification.** These are sensitive/restricted scopes, so a public app must pass Google's app verification. For a
-   personal project you stay in *testing*
+   personal project you stay in _testing_
    mode with your own account added as a test user.
 2. **It's asynchronous.** The flow is `initiate job → poll for state → download
-   archive`. Not a simple request/response. This is the most interesting backend piece in the whole project.
+archive`. Not a simple request/response. This is the most interesting backend piece in the whole project.
 
-**Strategy:** build the parser once against Takeout files, then swap the *source*
+**Strategy:** build the parser once against Takeout files, then swap the _source_
 for the Data Portability API later. Same downstream code.
 
 Docs: <https://developers.google.com/data-portability/schema-reference/local_actions>
@@ -92,7 +92,7 @@ Two processes, two `package.json` files, one repo.
 
 ### Why not Next.js
 
-- It's a *frontend* framework that runs server code. It hides routing, middleware ordering, and server lifecycle —
+- It's a _frontend_ framework that runs server code. It hides routing, middleware ordering, and server lifecycle —
   exactly what you want to learn.
 - The Data Portability poller needs a **long-lived process**. Route handlers are request/response shaped and common
   deployment targets time out at 10–60s.
@@ -141,7 +141,7 @@ Each step ships something that works. That matters more than it sounds.
 3. **React frontend with a map.** Now you have something to look at.
 4. **Google sign-in.** Auth only — OAuth flow, token storage, refresh handling.
 5. **Replace file upload with the Data Portability API.** Job table, poller, archive download, idempotent re-import.
-6. *(Optional)* Places API enrichment with caching and cost control.
+6. _(Optional)_ Places API enrichment with caching and cost control.
 
 ---
 

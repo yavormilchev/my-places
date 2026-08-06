@@ -14,10 +14,13 @@
     "dev:web": "npm run dev -w @my-places/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "db:up": "docker compose up -d",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
+    "prettier": "^3.9.6",
     "typescript": "^5.7.0"
   },
   "allowScripts": {

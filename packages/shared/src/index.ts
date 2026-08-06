@@ -1,6 +1,12 @@
 export type Category =
-  | 'restaurant' | 'cafe' | 'bar' | 'park'
-  | 'museum' | 'shop' | 'lodging' | 'other';
+  | "restaurant"
+  | "cafe"
+  | "bar"
+  | "park"
+  | "museum"
+  | "shop"
+  | "lodging"
+  | "other";
 
 /** A place as the API returns it. Not the DB row. */
 export interface Place {
@@ -12,7 +18,7 @@ export interface Place {
   lng: number;
   categories: Category[];
   tags: string[];
-  savedAt: string;        // ISO 8601
+  savedAt: string; // ISO 8601
 }
 
 export interface PlacesQuery {
@@ -27,13 +33,12 @@ export interface PlaceWithDistance extends Place {
   distanceKm: number;
 }
 
-export type ImportJobStatus =
-  | 'pending' | 'running' | 'succeeded' | 'failed';
+export type ImportJobStatus = "pending" | "running" | "succeeded" | "failed";
 
 export interface ImportJob {
   id: string;
   status: ImportJobStatus;
-  source: 'takeout' | 'data-portability';
+  source: "takeout" | "data-portability";
   placesImported: number;
   error: string | null;
   createdAt: string;
