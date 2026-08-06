@@ -19,7 +19,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check": "npm run format:check && npm run lint && npm run typecheck && printf '\\033[32mPASS\\033[0m\\n' || (printf '\\n\\033[31mFAIL\\033[0m\\n' && exit 1)"
+    "test": "vitest run",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && printf '\\033[32mPASS\\033[0m\\n' || (printf '\\n\\033[31mFAIL\\033[0m\\n' && exit 1)"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -31,7 +32,8 @@
     "globals": "^17.9.0",
     "prettier": "^3.9.6",
     "typescript": "^5.7.0",
-    "typescript-eslint": "^8.66.0"
+    "typescript-eslint": "^8.66.0",
+    "vitest": "^4.1.10"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
