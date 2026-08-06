@@ -2,23 +2,31 @@ name: CI
 
 on:
   push:
-    branches: [master]
-  pull_request:
+    branches:
+      - "master"
+  pull_request: null
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v4
+      - uses: "actions/checkout@v4"
 
-      - uses: actions/setup-node@v4
+      - uses: "actions/setup-node@v4"
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
 
-      - run: npm ci
+      - run: "npm ci"
 
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test
+      - name: "Format check"
+        run: npm run format:check
+
+      - name: "Lint check"
+        run: npm run lint
+
+      - name: "TS check"
+        run: npm run typecheck
+
+      - name: "Tests"
+        run: npm run test
