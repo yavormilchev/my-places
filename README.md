@@ -28,3 +28,12 @@ To run the local checks:
 Is web reachable at http://localhost:5173/
 Is API responding at http://localhost:3000/health
 Is API responding with DB live at: http://localhost:3000/db-health
+
+## How to export your saved places:
+
+1. Go to takeout.google.com.
+2. Click "Deselect all", then check just "Saved".
+3. Continue through the export options (file type .zip, default size limit is way more than enough for this).
+4. Create the export — Google emails you when it's done.
+5. Download and unzip it. Inside you'll find a Takeout/Saved/ folder containing csv files for all your saved lists.
+6. Drop the desired csv files in the uploads folder.
