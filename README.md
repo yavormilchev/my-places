@@ -39,3 +39,8 @@ Is API responding with DB live at: http://localhost:3000/db-health
 4. Create the export — Google emails you when it's done.
 5. Download and unzip it. Inside you'll find a Takeout/Saved/ folder containing csv files for all your saved lists.
 6. Drop the desired csv files in the uploads folder.
+7. Run the import command to load them into the app.
+
+```shell
+npm run import -w @my-places/api
+```
