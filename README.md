@@ -1,5 +1,7 @@
 # My Places Explorer
 
+[![CI](https://github.com/yavormilchev/my-places/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yavormilchev/my-places/actions/workflows/ci.yml)
+
 This project allows one to import their save places from Google Maps, and explore what's near by, filtering by category.
 For simplicity, this project has an API, Web, and shared types set up as workspaces, not separate repositories.
 
