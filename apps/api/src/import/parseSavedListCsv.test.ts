@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { parseSavedListCsv } from "./parseSavedListCsv";
-import path from "node:path";
-
-const fixturesDir = path.resolve(
-  import.meta.dirname,
-  "../../../../fixtures/places",
-);
+import { fixturePath } from "../testSupport/fixtures";
 
 describe("parseSavedListCsv", () => {
   it("parses CSV file returning all non-header rows", () => {
     const result = parseSavedListCsv(
-      path.join(fixturesDir, "Coffee.csv"),
+      fixturePath("places", "Coffee.csv"),
       "Coffee",
     );
 
@@ -36,7 +31,7 @@ describe("parseSavedListCsv", () => {
 
   it("can parse an empty file", () => {
     const result = parseSavedListCsv(
-      path.join(fixturesDir, "Empty.csv"),
+      fixturePath("places", "Empty.csv"),
       "Empty",
     );
 
@@ -44,10 +39,7 @@ describe("parseSavedListCsv", () => {
   });
 
   it("can parse a 0-places file", () => {
-    const result = parseSavedListCsv(
-      path.join(fixturesDir, "Zero.csv"),
-      "Zero",
-    );
+    const result = parseSavedListCsv(fixturePath("places", "Zero.csv"), "Zero");
 
     expect(result).toEqual([]);
   });

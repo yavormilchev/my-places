@@ -1,15 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { getAllPlaces } from "./import";
-import path from "node:path";
+import { fixturePath } from "../testSupport/fixtures";
 
 describe("import", () => {
   it("returns an array of lists of places", async () => {
-    const fixturesDir = path.resolve(
-      import.meta.dirname,
-      "../../../../fixtures/places",
-    );
-
-    const result = await getAllPlaces(fixturesDir);
+    const result = await getAllPlaces(fixturePath("places"));
 
     expect(result.length).toEqual(8);
     expect(result.filter((p) => p.title === "Coffee Culture").length).toEqual(
