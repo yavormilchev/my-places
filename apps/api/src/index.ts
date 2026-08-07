@@ -1,4 +1,5 @@
 import { env } from "./config";
+import { logger } from "./logger";
 import { pool } from "./db";
 import express from "express";
 
@@ -16,11 +17,11 @@ app.get("/db-health", async (_req, res) => {
     );
     res.json({ status: "ok", ...result.rows[0] });
   } catch (err) {
-    console.error(err);
+    logger.error({ err }, "Database health check failed");
     res.status(500).json({ status: "error", message: (err as Error).message });
   }
 });
 
 app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
+  logger.info(`API listening on http://localhost:${port}`);
 });
