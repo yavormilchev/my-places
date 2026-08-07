@@ -37,16 +37,23 @@ The `URL` column looks like a normal Maps link but only encodes a Google Feature
 (`.../data=!4m2!3m1!1s0x<hex>:0x<hex>`) — an opaque database key, not geodata. Turning it into a coordinate needs a
 separate resolution step:
 
-- **Scraping** the place's page — confirmed working against real exported URLs: a plain unauthenticated `GET` on
-  that link returns HTML whose `<meta property="og:image">` tag embeds a static-map preview URL with
-  `center=<lat>,<lng>`. Free, no setup — but undocumented and unofficial, and could break without notice. Pace
-  requests (sequential, small delay) and cache aggressively (once per place, ever) to stay a good citizen.
-- **Places API** (Place Details) — the sanctioned, paid alternative. The same response also carries `types`, which
-  would fold the category-resolution step (§3) into this same call.
+- **Scraping — tried, doesn't work.** A plain unauthenticated `GET` on a place URL isn't server-rendered per place at
+  all: it's a client-side SPA, so the response is Google's generic app shell regardless of which place was requested.
+  Confirmed by fetching two different real places and comparing — `og:image`, `og:title`, everything came back
+  byte-identical between them. There's no server-rendered coordinate to scrape from a bare HTTP request; getting what
+  the browser's address bar shows after load (`!3d<lat>!4d<lng>`) needs real JS execution — Playwright driving an
+  actual headless Chromium, one real browser process per place. Doable, but a much heavier runtime dependency for
+  something the Places API solves more cheaply.
+- **Places API** (Place Details) — the sanctioned alternative, and the one we're using. `location` (lat/lng) _and_
+  `types` (category, folds into §3) both sit in the cheapest tier, **Place Details Essentials — $5.00 per 1,000
+  requests, first 10,000 calls/month free** (per-SKU free tier, effective March 2025). For a few hundred places
+  that's within the free tier — effectively $0 for the initial import, and re-imports only pay for newly-saved
+  places thanks to the caching rule below.
 
-**Strategy:** wrap coordinate resolution behind one swappable function (`resolvePlaceCoordinates`) — start with
-scraping, swap the internals for Places API later if it breaks or the official path becomes worth the cost. Same
-principle as the Takeout → Data Portability swap below, one level down.
+**Strategy:** wrap coordinate + category resolution behind one swappable function (`resolvePlaceCoordinates`),
+backed by Places API. The swappable boundary paid off in practice, not just in theory — it's what let scraping get
+tried and rejected without touching anything downstream. Same principle as the Takeout → Data Portability swap
+below, one level down.
 
 No OAuth, no verification, no API cost for the CSV export itself. Good enough to build everything else on.
 
@@ -88,9 +95,9 @@ call per list, not automatic.
 Two ways to go further, if the list-name mapping isn't enough on its own:
 
 - **Places API enrichment** — resolve each place to its `types`
-  (`restaurant`, `cafe`, `park`…). This is a paid, rate-limited call, so cache results in a `places` table and never
-  re-fetch. Good practice, real cost. Note this is the same API call already needed for coordinates in §2, not an
-  extra one.
+  (`restaurant`, `cafe`, `park`…). Same Place Details Essentials call already needed for coordinates in §2, not an
+  extra one — free at this volume, but cache results in a `places` table and never re-fetch regardless, since that's
+  what keeps it free as the place count grows.
 - **User-assigned tags** — let the user tag places themselves. Free, simpler, and honestly more useful for personal
   categories like "date night".
 
@@ -163,14 +170,15 @@ to absorb alongside everything else.
 
 Each step ships something that works. That matters more than it sounds.
 
-1. **Parse Takeout "Saved" CSVs into Postgres**, resolving each place's coordinates through the swappable resolver
-   (§2). CLI script or one endpoint. No auth, no frontend. Get the data model right — including caching resolved
-   coordinates so re-imports never re-resolve a place that's already been looked up.
+1. **Parse Takeout "Saved" CSVs into Postgres**, resolving each place's coordinates and category through the
+   swappable resolver (§2), backed by Places API. CLI script or one endpoint. No auth, no frontend. Get the data
+   model right — including caching resolved places so re-imports never re-resolve one already looked up.
 2. **Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
-3. **React frontend with a map.** Now you have something to look at.
+3. **React frontend with a map.** Now you have something to look at — Maps Static API's `markers` parameter draws a
+   plain map image with pins for a list of lat/lngs, no JS map SDK needed for a first pass. Docs:
+   <https://developers.google.com/maps/documentation/maps-static/start?hl=en#Markers>
 4. **Google sign-in.** Auth only — OAuth flow, token storage, refresh handling.
 5. **Replace file upload with the Data Portability API.** Job table, poller, archive download, idempotent re-import.
-6. _(Optional)_ Places API enrichment with caching and cost control.
 
 ---
 
@@ -183,8 +191,9 @@ Each step ships something that works. That matters more than it sounds.
 - Geospatial queries and index design
 - Query-parameter API design for filtering
 - File parsing and validation of untrusted input
-- Isolating an unofficial/unstable data source (scraped coordinates) behind a swappable resolver, so the rest of the
-  pipeline doesn't care where coordinates come from
+- Isolating a data source behind a swappable resolver so the rest of the pipeline doesn't care where coordinates
+  come from — paid off directly: scraping was tried, found broken, and swapped for Places API without touching
+  anything downstream
 
 **What it won't teach:** real concurrency, horizontal scaling, complex domain modelling. It's a single-user app and
 that's fine.
@@ -196,11 +205,16 @@ that's fine.
 - **"Maps (your places)" and "Saved" are two different Takeout products.** The former gives GeoJSON but only for
   Labeled places (Home/Work/pins) — not your saved lists. The latter gives your actual saved lists, but only as CSV,
   no coordinates, for every list including starred places.
-- No CSV export has coordinates. All of them need the resolver from §2 (scraping or Places API) before a place is
-  usable for radius filtering.
+- No CSV export has coordinates. All of them need the Places API resolver from §2 before a place is usable for
+  radius filtering.
+- **Google Maps place pages are client-rendered SPAs, not server-rendered.** A plain unauthenticated `GET` on a
+  place URL returns Google's generic app shell — same `og:image`/`og:title` regardless of which place was
+  requested — not place-specific data. Confirmed by comparing two different real places side by side. Ruled out
+  scraping as a free coordinate source because of this, not just because it's "unofficial."
 - Re-imports must be idempotent. Design the unique key before writing the insert — the Feature ID in each row's URL
   is the natural candidate.
-- Coordinate/category resolution costs money (Places API) or carries ToS risk at volume (scraping). Cache
-  aggressively; never re-resolve a place already in `places`.
+- Coordinate/category resolution via Places API is free at single-user volume (Place Details Essentials: first
+  10,000 calls/month free, $5.00/1,000 after). Cache aggressively regardless; never re-resolve a place already in
+  `places` — that's what keeps it free as the place count grows.
 - Express 5 changed wildcard route syntax and query parsing from v4 — old tutorials may not copy-paste cleanly.
 - Data Portability API testing mode caps you at a limited number of test users.
