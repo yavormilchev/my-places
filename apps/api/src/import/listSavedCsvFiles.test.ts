@@ -17,8 +17,10 @@ describe("listSavedCsvFiles", () => {
     expect(byListName).toEqual([
       { listName: "Club", filePath: path.join(fixturesDir, "Club.csv") },
       { listName: "Coffee", filePath: path.join(fixturesDir, "Coffee.csv") },
+      { listName: "Empty", filePath: path.join(fixturesDir, "Empty.csv") },
       { listName: "Food", filePath: path.join(fixturesDir, "Food.csv") },
       { listName: "Parks", filePath: path.join(fixturesDir, "Parks.csv") },
+      { listName: "Zero", filePath: path.join(fixturesDir, "Zero.csv") },
     ]);
   });
 
