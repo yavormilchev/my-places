@@ -7,12 +7,12 @@ by radius and category.
 
 ## 1. What we're building
 
-| Feature             | Notes                                                      |
-| ------------------- | ---------------------------------------------------------- |
-| Google sign-in      | Standard OAuth 2.0 authorization code flow                 |
-| Import saved places | Via Takeout file upload (v1) → Data Portability API (v2)   |
-| Radius filter       | "Show me saved places within X km of my current location"  |
-| Category filter     | Restaurant / cafe / park / etc. — needs enrichment, see §3 |
+| Feature             | Notes                                                        |
+| ------------------- | ------------------------------------------------------------ |
+| Google sign-in      | Standard OAuth 2.0 authorization code flow                   |
+| Import saved places | Via Takeout file upload (v1) → Data Portability API (v2)     |
+| Radius filter       | "Show me saved places within X miles of my current location" |
+| Category filter     | Restaurant / cafe / park / etc. — needs enrichment, see §3   |
 
 Single-user by nature. No scaling concerns, no complex domain modelling.
 

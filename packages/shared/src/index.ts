@@ -1,13 +1,3 @@
-export type Category =
-  | "restaurant"
-  | "cafe"
-  | "bar"
-  | "park"
-  | "museum"
-  | "shop"
-  | "lodging"
-  | "other";
-
 /** A place as the API returns it. Not the DB row. */
 export interface Place {
   id: string;
@@ -16,7 +6,7 @@ export interface Place {
   address: string | null;
   lat: number;
   lng: number;
-  categories: Category[];
+  categories: string[];
   tags: string[];
   savedAt: string; // ISO 8601
 }
@@ -24,13 +14,13 @@ export interface Place {
 export interface PlacesQuery {
   lat: number;
   lng: number;
-  radiusKm: number;
-  category?: Category;
+  radiusMiles: number;
+  categories: string[];
 }
 
 /** Distance is computed per-query, so it isn't part of Place. */
 export interface PlaceWithDistance extends Place {
-  distanceKm: number;
+  distanceMiles: number;
 }
 
 export type ImportJobStatus = "pending" | "running" | "succeeded" | "failed";
