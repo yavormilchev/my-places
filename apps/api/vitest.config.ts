@@ -25,5 +25,12 @@ export default defineConfig({
       // of the real database, with zero test-awareness needed in app code.
       DATABASE_URL: process.env.TEST_DATABASE_URL,
     },
+    // Multiple test files (syncPlaces, getExistingPlaceIds, ...) truncate
+    // and write to the same my_places_test database via resetDb(). Running
+    // test files in parallel means one file's resetDb() can wipe another
+    // file's in-progress test data mid-assertion — a real race, not a
+    // flaky test. This whole suite runs in well under a second, so
+    // trading file-level parallelism for correctness costs nothing here.
+    fileParallelism: false,
   },
 });
