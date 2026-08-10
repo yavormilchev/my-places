@@ -17,4 +17,17 @@ describe("extractPlaceIdFromUrl", () => {
       ),
     ).toEqual(null);
   });
+
+  it("returns a synthetic pin: ID for a dropped pin, from real coordinates in the URL", () => {
+    expect(
+      extractPlaceIdFromUrl(
+        "https://www.google.com/maps/search/26.8444241,-80.0670146",
+      ),
+    ).toEqual("pin:26.8444241,-80.0670146");
+  });
+
+  it("returns the same pin: ID for the same dropped pin every time, for idempotent re-imports", () => {
+    const url = "https://www.google.com/maps/search/26.8444241,-80.0670146";
+    expect(extractPlaceIdFromUrl(url)).toEqual(extractPlaceIdFromUrl(url));
+  });
 });

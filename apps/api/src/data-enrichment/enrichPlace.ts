@@ -19,6 +19,8 @@ export interface EnrichedPlace extends RawSavedPlace, PlaceDetails {
   placeId: string;
 }
 
+const DROPPED_PIN_PLACE_ID = /^pin:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/;
+
 export async function enrichPlace(
   place: RawSavedPlace,
 ): Promise<EnrichedPlace | null> {
@@ -26,6 +28,20 @@ export async function enrichPlace(
   if (!placeId) {
     logger.warn({ url: place.url }, "Could not extract a place ID from URL");
     return null;
+  }
+
+  const droppedPin = placeId.match(DROPPED_PIN_PLACE_ID);
+  if (droppedPin) {
+    // A dropped pin has no established place to resolve — the coordinates
+    // are already in the URL, so there's nothing to ask the Places API for.
+    return {
+      ...place,
+      placeId,
+      resolvedTitle: place.title,
+      lat: Number(droppedPin[1]),
+      lng: Number(droppedPin[2]),
+      types: [],
+    };
   }
 
   const details = await fetchPlaceDetails(placeId);

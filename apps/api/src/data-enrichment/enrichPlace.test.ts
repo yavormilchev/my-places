@@ -68,4 +68,27 @@ describe("enrichPlace", () => {
 
     expect(result).toBeNull();
   });
+
+  it("resolves a dropped pin straight from its URL, without calling the Places API", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const droppedPin: RawSavedPlace = {
+      ...SAVED_PLACE,
+      title: "Dropped pin",
+      url: "https://www.google.com/maps/search/26.8444241,-80.0670146",
+    };
+
+    const result = await enrichPlace(droppedPin);
+
+    expect(result).toEqual({
+      ...droppedPin,
+      placeId: "pin:26.8444241,-80.0670146",
+      resolvedTitle: "Dropped pin",
+      lat: 26.8444241,
+      lng: -80.0670146,
+      types: [],
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });
