@@ -21,8 +21,11 @@ export interface FeatureId {
  */
 export function featureIdToPlaceId(id: FeatureId): string {
   const strip0x = (hex: string) => hex.replace(/^0x/i, "");
+  // Google renders small hex64 components without leading zeros (e.g. "0x0"
+  // instead of "0x0000000000000000") — pad back out to the full 8 bytes
+  // before pairing/reversing, or a short value has no complete byte pairs.
   const toLittleEndianBytes = (hex: string): Buffer =>
-    Buffer.from(hex.match(/../g)!.reverse().join(""), "hex");
+    Buffer.from(hex.padStart(16, "0").match(/../g)!.reverse().join(""), "hex");
 
   const bytes = Buffer.concat([
     Buffer.from([0x0a, 0x12, 0x09]),

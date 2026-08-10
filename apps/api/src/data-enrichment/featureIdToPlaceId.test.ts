@@ -16,5 +16,12 @@ describe("featureIdToPlaceId", () => {
         hexB: "0x9f7662e5538bb215",
       }),
     ).toEqual("ChIJTQUJw-ej6IgRFbKLU-Vidp8");
+
+    expect(
+      featureIdToPlaceId({
+        hexA: "0x0",
+        hexB: "0xbbd285dffb983cfe",
+      }),
+    ).toEqual("ChIJAAAAAAAAAAAR_jyY-9-F0rs");
   });
 });

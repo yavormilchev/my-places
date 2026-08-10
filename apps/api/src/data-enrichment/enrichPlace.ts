@@ -45,7 +45,10 @@ export async function enrichPlace(
   }
 
   const details = await fetchPlaceDetails(placeId);
-  if (!details) return null;
+  if (!details) {
+    logger.warn({ url: place.url }, "Failed to fetch place details.");
+    return null;
+  }
 
   return { ...place, ...details, placeId };
 }
