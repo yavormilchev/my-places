@@ -11,6 +11,24 @@ on:
 jobs:
   check:
     runs-on: "ubuntu-latest"
+    env:
+      DATABASE_URL: "postgres://ci_user:ci_pass@localhost:5432/my_places"
+      TEST_DATABASE_URL: "postgres://ci_user:ci_pass@localhost:5432/my_places"
+      GOOGLE_MAPS_API_KEY: "INVALID"
+    services:
+      postgres:
+        image: "imresamu/postgis:17-3.6"
+        env:
+          POSTGRES_USER: "ci_user"
+          POSTGRES_PASSWORD: "ci_pass"
+          POSTGRES_DB: "my_places"
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U ci_user -d my_places"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v4"
@@ -33,7 +51,8 @@ jobs:
       - name: "TS check"
         run: "npm run typecheck"
 
+      - name: "Run migrations"
+        run: "npm run migrate -w @my-places/api -- up"
+
       - name: "Tests"
-        env:
-          DATABASE_URL: "postgres://ci_user:ci_pass@localhost:5432/my_places"
         run: "npm run test"
