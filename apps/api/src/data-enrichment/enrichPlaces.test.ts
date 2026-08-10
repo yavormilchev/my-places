@@ -123,6 +123,7 @@ describe("enrichPlaces", () => {
     expect(results).toHaveLength(1);
     expect(results[0]).toEqual({
       ...goodPlace,
+      placeId: extractPlaceIdFromUrl(goodPlace.url),
       resolvedTitle: "Real Place",
       lat: 0,
       lng: 0,

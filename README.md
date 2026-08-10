@@ -15,6 +15,12 @@ To install dependencies:
 To provision the DB:
 `npm run db:up`
 
+To run the migrations:
+
+```shell
+npm run migrate -w @my-places/api -- up
+```
+
 ## Running locally
 
 Provided the DB is already running:

@@ -37,6 +37,7 @@ describe("enrichPlace", () => {
 
     expect(result).toEqual({
       ...SAVED_PLACE,
+      placeId: "ChIJx-PcrUzj2IgRIivwN5sAiPE",
       resolvedTitle: "Crema Gourmet Boca Raton",
       lat: 26.3534175,
       lng: -80.0858128,

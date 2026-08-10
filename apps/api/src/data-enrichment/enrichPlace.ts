@@ -10,8 +10,14 @@ import { fetchPlaceDetails, type PlaceDetails } from "./fetchPlaceDetails";
  * occupying that location (see project-plan.md §8). Comparing them and
  * deciding whether that's worth surfacing is a caller concern, not this
  * function's.
+ *
+ * `placeId` is the derived Google Place ID (see extractPlaceIdFromUrl.ts) —
+ * the natural unique key for idempotent imports, since it's Google's own
+ * canonical identity for the place, not our own encoding of it.
  */
-export interface EnrichedPlace extends RawSavedPlace, PlaceDetails {}
+export interface EnrichedPlace extends RawSavedPlace, PlaceDetails {
+  placeId: string;
+}
 
 export async function enrichPlace(
   place: RawSavedPlace,
@@ -25,5 +31,5 @@ export async function enrichPlace(
   const details = await fetchPlaceDetails(placeId);
   if (!details) return null;
 
-  return { ...place, ...details };
+  return { ...place, ...details, placeId };
 }

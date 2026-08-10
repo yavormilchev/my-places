@@ -8,13 +8,16 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit",
-    "import": "tsx src/scripts/import-places.ts"
+    "import": "tsx src/scripts/import-places.ts",
+    "migrate": "node-pg-migrate --envPath ../../.env",
+    "migrate:test": "node-pg-migrate --envPath ../../.env -d TEST_DATABASE_URL"
   },
   "dependencies": {
     "@my-places/shared": "*",
     "csv-parse": "^7.0.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "node-pg-migrate": "^9.0.0",
     "pg": "^8.22.0",
     "pino": "^10.3.1"
   },
