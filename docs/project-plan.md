@@ -50,10 +50,17 @@ separate resolution step:
   that's within the free tier — effectively $0 for the initial import, and re-imports only pay for newly-saved
   places thanks to the caching rule below.
 
-**Strategy:** wrap coordinate + category resolution behind one swappable function (`resolvePlaceCoordinates`),
-backed by Places API. The swappable boundary paid off in practice, not just in theory — it's what let scraping get
-tried and rejected without touching anything downstream. Same principle as the Takeout → Data Portability swap
-below, one level down.
+**Strategy:** wrap coordinate + category resolution behind a swappable boundary (`enrichPlace`/`enrichPlaces` in
+`apps/api/src/data-enrichment/`) — paid off in practice, not just in theory: it's what let scraping get tried and
+rejected without touching anything downstream. Same principle as the Takeout → Data Portability swap below, one
+level down.
+
+**How it actually resolves a place, once Places API was the answer:** the Feature ID isn't directly usable as API
+input — no documented endpoint converts it to a `place_id`. Reverse-engineered instead, by decoding real Place IDs:
+a Place ID is base64url of a small protobuf message holding the Feature ID's two hex64 values as raw little-endian
+bytes — fully local, no network call (`featureIdToPlaceId`). Confirmed against the live API for multiple independent
+real places, not just that the decoding math lined up. One Place Details Essentials call then gets `location` +
+`types` together (`fetchPlaceDetails`) — see §8 for why this derivation, like scraping, is unofficial.
 
 No OAuth, no verification, no API cost for the CSV export itself. Good enough to build everything else on.
 
@@ -170,9 +177,10 @@ to absorb alongside everything else.
 
 Each step ships something that works. That matters more than it sounds.
 
-1. **Parse Takeout "Saved" CSVs into Postgres**, resolving each place's coordinates and category through the
-   swappable resolver (§2), backed by Places API. CLI script or one endpoint. No auth, no frontend. Get the data
-   model right — including caching resolved places so re-imports never re-resolve one already looked up.
+1. **✅ Parse Takeout "Saved" CSVs into Postgres**, resolving each place's coordinates and category through the
+   swappable resolver (§2), backed by Places API. Built as a CLI script (`npm run import`). Re-imports fully
+   reconcile the table against the current export — upserts everything present, and deletes rows for places no
+   longer in it — not just insert-and-forget.
 2. **Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
 3. **React frontend with a map.** Now you have something to look at — Maps Static API's `markers` parameter draws a
    plain map image with pins for a list of lat/lngs, no JS map SDK needed for a first pass. Docs:
@@ -187,7 +195,11 @@ Each step ships something that works. That matters more than it sounds.
 - OAuth 2.0 authorization code flow, token storage, refresh handling
 - Async job orchestration (initiate → poll → download)
 - Third-party rate limits, caching, and cost control
-- **Idempotent imports** — running twice must not duplicate rows (upsert on place ID)
+- **Idempotent, reconciling imports** — running twice must not duplicate rows (upsert on place ID), and removing a
+  place from the export should remove it from the table too, without treating "failed to resolve this run" the same
+  as "actually removed" (see `syncPlaces`)
+- Testing against a real database safely — a dedicated test database instead of mocking the DB driver, so tests
+  prove real SQL behavior without risking real data
 - Geospatial queries and index design
 - Query-parameter API design for filtering
 - File parsing and validation of untrusted input
@@ -211,8 +223,15 @@ that's fine.
   place URL returns Google's generic app shell — same `og:image`/`og:title` regardless of which place was
   requested — not place-specific data. Confirmed by comparing two different real places side by side. Ruled out
   scraping as a free coordinate source because of this, not just because it's "unofficial."
-- Re-imports must be idempotent. Design the unique key before writing the insert — the Feature ID in each row's URL
-  is the natural candidate.
+- Re-imports must be idempotent. The unique key is the derived Place ID (see §2), not the raw Feature ID it comes
+  from — upsert on that.
+- **The Feature ID → Place ID conversion is unofficial and undocumented**, same caveat as scraping: reverse-engineered
+  by decoding real Place IDs, not published anywhere by Google. Unlike scraping, though, the failure mode is clean —
+  an invalid derived Place ID just 404s against Place Details, it doesn't silently return wrong data.
+- **A Place ID can outlive the business occupying that location.** Google Place IDs track the physical listing, not
+  the current occupant — a saved place's `resolved_title` (from the API) can legitimately differ from `title` (what
+  you saved it as), because the business changed, not because anything broke. Confirmed for real: one saved place
+  came back under a completely different business name at the same address.
 - Coordinate/category resolution via Places API is free at single-user volume (Place Details Essentials: first
   10,000 calls/month free, $5.00/1,000 after). Cache aggressively regardless; never re-resolve a place already in
   `places` — that's what keeps it free as the place count grows.
