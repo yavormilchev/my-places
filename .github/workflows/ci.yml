@@ -36,4 +36,5 @@ jobs:
       - name: "Tests"
         env:
           DATABASE_URL: "postgres://ci_user:ci_pass@localhost:5432/my_places"
+          GOOGLE_MAPS_API_KEY: "INVALID"
         run: "npm run test"
