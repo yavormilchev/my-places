@@ -6,6 +6,8 @@ A personal tool for importing Google Maps saved places and browsing them by loca
 Single-user by design: no accounts, no multi-tenancy, just me. Full design reasoning and tradeoffs live in
 [`docs/project-plan.md`](docs/project-plan.md).
 
+![App preview](docs/images/app-preview.png)
+
 ## A few things worth knowing about how this works
 
 - **Google Maps has no API for a user's saved places.** Every "import my saved places" tool works around that —

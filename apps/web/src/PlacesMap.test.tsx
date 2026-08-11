@@ -56,6 +56,27 @@ vi.mock("@vis.gl/react-google-maps", () => ({
   ),
 }));
 
+// PlacesMap builds each marker's icon via `new google.maps.Size(...)` /
+// `Point(...)` directly (see emojiMarkerIcon.ts's use in PlacesMap.tsx) —
+// that runs in our own render code, not inside the mocked Marker above, so
+// it needs these to exist even though the real SDK is never loaded here.
+vi.stubGlobal("google", {
+  maps: {
+    Size: class Size {
+      constructor(
+        public width: number,
+        public height: number,
+      ) {}
+    },
+    Point: class Point {
+      constructor(
+        public x: number,
+        public y: number,
+      ) {}
+    },
+  },
+});
+
 const PLACE: PlaceWithDistance = {
   placeId: "test-place",
   title: "Test Cafe",

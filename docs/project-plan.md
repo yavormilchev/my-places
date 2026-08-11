@@ -182,9 +182,7 @@ Each step ships something that works. That matters more than it sounds.
    reconcile the table against the current export — upserts everything present, and deletes rows for places no
    longer in it — not just insert-and-forget.
 2. **✅ Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
-3. **React frontend with a map.** Now you have something to look at — Maps Static API's `markers` parameter draws a
-   plain map image with pins for a list of lat/lngs, no JS map SDK needed for a first pass. Docs:
-   <https://developers.google.com/maps/documentation/maps-static/start?hl=en#Markers>
+3. **✅ React frontend with a map.** Now you have something to look at.
 4. **Google sign-in.** Auth only — OAuth flow, token storage, refresh handling.
 5. **Replace file upload with the Data Portability API.** Job table, poller, archive download, idempotent re-import.
 
