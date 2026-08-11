@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { filterByCategory } from "../filtering/filterByCategory";
-import { filterByRadius } from "../filtering/filterByRadius";
+import { filterByRadiusWithDistance } from "../filtering/filterByRadiusWithDistance";
 import { listPlaces } from "../persistence/listPlaces";
 import { parsePlacesQuery } from "./parsePlacesQuery";
 
@@ -16,7 +16,7 @@ export async function getPlaces(req: Request, res: Response): Promise<void> {
   }
 
   const places = await listPlaces();
-  const withinRadius = filterByRadius(places, query);
+  const withinRadius = filterByRadiusWithDistance(places, query);
   const result = filterByCategory(withinRadius, query.categories);
 
   res.json(result);
