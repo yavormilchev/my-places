@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import path from "node:path";
-import { getAllPlaces } from "../import/import";
+import { importAllPlaces } from "../import/import";
 import { enrichPlaces } from "../data-enrichment/enrichPlaces";
 import { filterUnresolvedPlaces } from "../data-enrichment/filterUnresolvedPlaces";
 import { getExistingPlaceIds } from "../persistence/getExistingPlaceIds";
@@ -21,7 +21,7 @@ const { values } = parseArgs({
 });
 
 try {
-  const places = await getAllPlaces(values.dir);
+  const places = await importAllPlaces(values.dir);
   logger.info(`Parsed ${places.length} places from ${values.dir}`);
 
   let placesToResolve = places;

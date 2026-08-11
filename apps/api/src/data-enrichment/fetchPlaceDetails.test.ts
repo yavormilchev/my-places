@@ -4,7 +4,6 @@ import { fetchPlaceDetails } from "./fetchPlaceDetails";
 // Real shape captured from the live API for ChIJx-PcrUzj2IgRIivwN5sAiPE.
 const CREMA_GOURMET_RESPONSE = {
   types: ["cafe", "coffee_shop", "restaurant", "food", "point_of_interest"],
-  formattedAddress: "305 W Plaza Real #1305, Boca Raton, FL 33432, USA",
   location: { latitude: 26.3534175, longitude: -80.0858128 },
   displayName: { text: "Crema Gourmet Boca Raton", languageCode: "en" },
 };

@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/yavormilchev/my-places/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yavormilchev/my-places/actions/workflows/ci.yml)
 
-A personal tool for importing Google Maps saved places and browsing them by location and category — built as a
-learning project, not a product. It's single-user by design: no accounts, no multi-tenancy, just me. Full design
-reasoning and tradeoffs live in [`docs/project-plan.md`](docs/project-plan.md).
+A personal tool for importing Google Maps saved places and browsing them by location and category — not a product.
+Single-user by design: no accounts, no multi-tenancy, just me. Full design reasoning and tradeoffs live in
+[`docs/project-plan.md`](docs/project-plan.md).
 
 ## A few things worth knowing about how this works
 

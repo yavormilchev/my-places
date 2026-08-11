@@ -1,0 +1,23 @@
+import type { Request, Response } from "express";
+import { filterByCategory } from "../filtering/filterByCategory";
+import { filterByRadius } from "../filtering/filterByRadius";
+import { listPlaces } from "../persistence/listPlaces";
+import { parsePlacesQuery } from "./parsePlacesQuery";
+
+export async function getPlaces(req: Request, res: Response): Promise<void> {
+  const query = parsePlacesQuery(req.query);
+  if (!query) {
+    res.status(400).json({
+      status: "error",
+      message:
+        "lat, lng, and radius query params are required and must be numbers",
+    });
+    return;
+  }
+
+  const places = await listPlaces();
+  const withinRadius = filterByRadius(places, query);
+  const result = filterByCategory(withinRadius, query.categories);
+
+  res.json(result);
+}

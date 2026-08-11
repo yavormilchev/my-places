@@ -1,6 +1,6 @@
 # Saved Places Explorer — Project Plan
 
-A backend-focused learning project: sign in with Google, import your Google Maps saved places, and browse them filtered
+A backend-focused personal project: sign in with Google, import your Google Maps saved places, and browse them filtered
 by radius and category.
 
 ---
@@ -116,10 +116,10 @@ Doing both eventually is reasonable: start from list names, layer Places API and
 
 - **Honest baseline:** for a few hundred places, haversine in plain TypeScript over an in-memory array is completely
   sufficient.
-- **Learning path:** Postgres + PostGIS, `ST_DWithin` with a GiST index.
+- **PostGIS path:** Postgres + PostGIS, `ST_DWithin` with a GiST index.
 
-Pick PostGIS if the point is to learn spatial querying; pick haversine if you want to move fast. Don't pretend the first
-is necessary at this scale.
+Pick PostGIS for proper spatial indexing and query-level filtering; pick haversine if in-memory filtering over a few
+hundred rows is good enough (it is, at this scale).
 
 ---
 
@@ -135,12 +135,12 @@ Two processes, two `package.json` files, one repo.
 ### Why not Next.js
 
 - It's a _frontend_ framework that runs server code. It hides routing, middleware ordering, and server lifecycle —
-  exactly what you want to learn.
+  exactly the layer this project needs direct control over.
 - The Data Portability poller needs a **long-lived process**. Route handlers are request/response shaped and common
   deployment targets time out at 10–60s.
 - Debugging becomes "is this Next or me?"
 
-Build a Next app when learning Next is the goal. Separate project.
+Next has a real place for a frontend-heavy app — just not this one.
 
 ### Why not Nuxt
 
@@ -181,7 +181,7 @@ Each step ships something that works. That matters more than it sounds.
    swappable resolver (§2), backed by Places API. Built as a CLI script (`npm run import`). Re-imports fully
    reconcile the table against the current export — upserts everything present, and deletes rows for places no
    longer in it — not just insert-and-forget.
-2. **Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
+2. **✅ Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
 3. **React frontend with a map.** Now you have something to look at — Maps Static API's `markers` parameter draws a
    plain map image with pins for a list of lat/lngs, no JS map SDK needed for a first pass. Docs:
    <https://developers.google.com/maps/documentation/maps-static/start?hl=en#Markers>
@@ -190,7 +190,7 @@ Each step ships something that works. That matters more than it sounds.
 
 ---
 
-## 7. Backend concepts this exercises
+## 7. Backend concepts covered
 
 - OAuth 2.0 authorization code flow, token storage, refresh handling
 - Async job orchestration (initiate → poll → download)
@@ -207,8 +207,8 @@ Each step ships something that works. That matters more than it sounds.
   come from — paid off directly: scraping was tried, found broken, and swapped for Places API without touching
   anything downstream
 
-**What it won't teach:** real concurrency, horizontal scaling, complex domain modelling. It's a single-user app and
-that's fine.
+**Deliberately out of scope:** real concurrency, horizontal scaling, complex domain modelling — not needed for a
+single-user app.
 
 ---
 
