@@ -86,3 +86,7 @@ Is API responding with DB live at: http://localhost:3000/db-health
 ```shell
 npm run import -w @my-places/api
 ```
+
+## License
+
+[MIT](LICENSE)
