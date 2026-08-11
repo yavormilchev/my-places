@@ -1,10 +1,9 @@
 import { env } from "../config";
 import { logger } from "../logger";
+import { Coordinates } from "@my-places/shared";
 
-export interface PlaceDetails {
+export interface PlaceDetails extends Coordinates {
   resolvedTitle: string;
-  lat: number;
-  lng: number;
   types: string[];
 }
 

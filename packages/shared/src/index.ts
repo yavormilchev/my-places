@@ -1,19 +1,23 @@
-/** A place as the API returns it. Not the DB row. */
-export interface Place {
-  id: string;
-  googlePlaceId: string | null;
-  name: string;
-  address: string | null;
+export interface Coordinates {
   lat: number;
   lng: number;
-  categories: string[];
-  tags: string[];
+}
+
+/**
+ * A place as the API returns it. Not the DB row — see apps/api's
+ * persistence/toPlace.ts for the mapping.
+ */
+export interface Place extends Coordinates {
+  placeId: string;
+  title: string;
+  resolvedTitle: string | null;
+  category: string;
+  types: string[];
+  url: string;
   savedAt: string; // ISO 8601
 }
 
-export interface PlacesQuery {
-  lat: number;
-  lng: number;
+export interface PlacesQuery extends Coordinates {
   radiusMiles: number;
   categories: string[];
 }
