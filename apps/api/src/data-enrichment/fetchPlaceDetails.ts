@@ -27,7 +27,7 @@ export async function fetchPlaceDetails(
       `https://places.googleapis.com/v1/places/${placeId}`,
       {
         headers: {
-          "X-Goog-Api-Key": env.googleMapsApiKey,
+          "X-Goog-Api-Key": env.googlePlacesServerSideApiKey,
           "X-Goog-FieldMask": "displayName,location,types",
         },
       },

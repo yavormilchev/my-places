@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { PlacesQuery } from "@my-places/shared";
+import { haversineDistanceMiles, type PlacesQuery } from "@my-places/shared";
 import { filterByRadius } from "./filterByRadius";
-import { haversineDistanceMiles } from "./haversineDistanceMiles";
 
 const NYC = { lat: 40.7128, lng: -74.006 };
 const LA = { lat: 34.0522, lng: -118.2437 };

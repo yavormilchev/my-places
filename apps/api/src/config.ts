@@ -16,8 +16,8 @@ export const env = {
   databaseUrl: required("DATABASE_URL", process.env.DATABASE_URL),
   isProduction: process.env.NODE_ENV === "production",
   logLevel: process.env.LOG_LEVEL ?? "info",
-  googleMapsApiKey: required(
-    "GOOGLE_MAPS_API_KEY",
-    process.env.GOOGLE_MAPS_API_KEY,
+  googlePlacesServerSideApiKey: required(
+    "GOOGLE_PLACES_SERVER_SIDE_API_KEY",
+    process.env.GOOGLE_PLACES_SERVER_SIDE_API_KEY,
   ),
 };

@@ -1,3 +1,5 @@
+export { haversineDistanceMiles } from "./haversineDistanceMiles";
+
 export interface Coordinates {
   lat: number;
   lng: number;

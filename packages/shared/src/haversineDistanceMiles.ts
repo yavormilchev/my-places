@@ -1,4 +1,4 @@
-import { Coordinates } from "@my-places/shared";
+import type { Coordinates } from "./index";
 
 /**
  * Calculates the great-circle distance between two points on the Earth
