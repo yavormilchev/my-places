@@ -1,5 +1,5 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { PlacesMap } from "./PlacesMap";
+import { PlacesMap } from "./map/PlacesMap";
 
 export default function App() {
   return (

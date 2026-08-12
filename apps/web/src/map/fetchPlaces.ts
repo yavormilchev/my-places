@@ -1,4 +1,5 @@
 import type { PlaceWithDistance, PlacesQuery } from "@my-places/shared";
+import { UnauthorizedError } from "../auth/auth";
 
 export async function fetchPlaces(
   query: PlacesQuery,
@@ -13,6 +14,9 @@ export async function fetchPlaces(
   }
 
   const response = await fetch(`/places?${params}`);
+  if (response.status === 401) {
+    throw new UnauthorizedError();
+  }
   if (!response.ok) {
     throw new Error(`Failed to fetch places: ${response.status}`);
   }

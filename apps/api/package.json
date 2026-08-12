@@ -14,15 +14,20 @@
   },
   "dependencies": {
     "@my-places/shared": "*",
+    "cookie-parser": "^1.4.7",
     "csv-parse": "^7.0.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "google-auth-library": "^11.0.1",
+    "jsonwebtoken": "^9.0.3",
     "node-pg-migrate": "^9.0.0",
     "pg": "^8.22.0",
     "pino": "^10.3.1"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.2",
     "@types/pg": "^8.20.4",
     "pino-pretty": "^13.1.3",

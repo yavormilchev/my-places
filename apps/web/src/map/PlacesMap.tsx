@@ -13,7 +13,9 @@ import {
 } from "@my-places/shared";
 import { useCurrentLocation } from "./useCurrentLocation";
 import { fetchPlaces } from "./fetchPlaces";
+import { redirectToLogin, UnauthorizedError } from "../auth/auth";
 import { CategoryFilter } from "./CategoryFilter";
+import { SignOutButton } from "../auth/SignOutButton";
 import { emojiForCategory } from "./categoryEmoji";
 import { emojiMarkerIconUrl } from "./emojiMarkerIcon";
 
@@ -21,8 +23,7 @@ import { emojiMarkerIconUrl } from "./emojiMarkerIcon";
  * The backend filters by a circular radius, but the map viewport is a
  * rectangle — sizing the radius to reach the farthest corner means nothing
  * currently visible is ever missing, at the cost of a few extra places just
- * outside the rectangle's edges also coming back. That's the right side to
- * be imprecise on.
+ * outside the rectangle's edges also coming back.
  */
 function radiusMilesFromBounds(
   center: Coordinates,
@@ -49,12 +50,9 @@ export function PlacesMap() {
     new Set(),
   );
 
-  // Fires once after the map settles from a pan or zoom (including the
-  // initial load) — not continuously during the interaction, so this needs
-  // no hand-rolled debouncing. Always fetched unfiltered by category (see
-  // getPlaces.ts — an empty categories list means "no filter"); category
-  // filtering happens client-side below so toggling a checkbox doesn't
-  // need a round trip.
+  // Fires once after the map settles from a pan or zoom — not continuously
+  // during the interaction. Always fetched unfiltered by category so toggling
+  // a checkbox doesn't need a round trip.
   const handleIdle = useCallback((event: MapEvent) => {
     const center = event.map.getCenter();
     const bounds = event.map.getBounds();
@@ -70,6 +68,10 @@ export function PlacesMap() {
     fetchPlaces(query)
       .then(setPlaces)
       .catch((err: unknown) => {
+        if (err instanceof UnauthorizedError) {
+          redirectToLogin();
+          return;
+        }
         console.error("Failed to fetch places", err);
       });
   }, []);
@@ -101,6 +103,7 @@ export function PlacesMap() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <SignOutButton />
       <CategoryFilter
         categories={availableCategories}
         excluded={excludedCategories}

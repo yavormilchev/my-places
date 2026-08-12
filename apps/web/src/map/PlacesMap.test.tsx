@@ -1,9 +1,10 @@
 import { useEffect, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { PlaceWithDistance } from "@my-places/shared";
 import { PlacesMap } from "./PlacesMap";
+import * as auth from "../auth/auth";
 
 // Stand-ins for the real Google Maps SDK components. The real ones need a
 // loaded Maps script, a live API key, and canvas/WebGL rendering — none of
@@ -116,5 +117,19 @@ describe("PlacesMap", () => {
     expect(await screen.findByRole("dialog")).toHaveTextContent(
       "Test Cafe (Resolved)",
     );
+  });
+
+  it("redirects to sign-in when the places fetch comes back unauthenticated", async () => {
+    const redirectToLogin = vi
+      .spyOn(auth, "redirectToLogin")
+      .mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 401 } as Response),
+    );
+
+    render(<PlacesMap />);
+
+    await waitFor(() => expect(redirectToLogin).toHaveBeenCalled());
   });
 });
