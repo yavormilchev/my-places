@@ -16,7 +16,7 @@ export function haversineDistanceMiles(
     return 0;
   }
 
-  // Define Earth's radius based on the requested unit
+  // Define Earth's radius in miles
   const EARTH_RADIUS = 3959;
 
   // Helper function to convert degrees to radians
