@@ -4,7 +4,8 @@
 
 A personal tool for importing Google Maps saved places and browsing them by location and category — not a product.
 Single-user by design: no accounts, no multi-tenancy, just me. Full design reasoning and tradeoffs live in
-[`docs/project-plan.md`](docs/project-plan.md).
+[`docs/project-plan.md`](docs/project-plan.md); the hosting/deployment architecture is in
+[`docs/decisions/hosting.md`](docs/decisions/hosting.md).
 
 ![App preview](docs/images/app-preview.png)
 
@@ -22,9 +23,10 @@ Single-user by design: no accounts, no multi-tenancy, just me. Full design reaso
   ID format** — there's no documented conversion from what Takeout exports. Decoding real Place IDs showed they're
   base64url of a small protobuf message holding the URL's embedded ID as raw bytes — fully local, no API call
   needed, and confirmed against the live API for multiple real places before being trusted.
-- **Re-importing doesn't just add places — it reconciles.** Removing a place from Google Maps removes it from the
-  database too on the next import, with a safety guard against ever treating "the API had a bad day this run" the
-  same as "you actually removed this."
+- **Re-importing doesn't just add places — it reconciles, scoped to the list being imported.** Removing a place
+  from a saved list removes it from the database too on the next import of that list, with a safety guard against
+  ever treating "the API had a bad day this run" the same as "you actually removed this" — and without touching
+  any other list's places in the process.
 
 ## Stack
 
@@ -34,25 +36,38 @@ Single-user by design: no accounts, no multi-tenancy, just me. Full design reaso
 
 ## Initial setup
 
-Run these commands in the root folder:
+Run these commands in the root folder.
 
-To install dependencies:
-`npm install`
+Install dependencies:
 
-Copy `.env.example` to `.env` and fill in your own values (Postgres credentials, a Google Maps API key with the
-Places API enabled).
+```shell
+npm install
+```
 
-To provision the DB:
-`npm run db:up`
+Copy `.env.example` to `.env` and fill in your own values:
 
-To create the test database (a separate, disposable database the test suite runs against — see
+- **Database** — `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`, and the matching `DATABASE_URL`/`TEST_DATABASE_URL`.
+- **Google Places API** — `GOOGLE_PLACES_SERVER_SIDE_API_KEY` (server-side, resolves coordinates/categories) and
+  `VITE_GOOGLE_MAPS_PUBLIC_KEY` (browser-side, renders the map).
+- **Google sign-in** — `GOOGLE_OAUTH_CLIENT_ID`/`GOOGLE_OAUTH_CLIENT_SECRET` from a Google Cloud OAuth client, plus
+  `GOOGLE_OAUTH_REDIRECT_URI` and `WEB_APP_URL` (the defaults in `.env.example` match local dev as-is).
+- **Session** — `SESSION_SECRET` (generate with `openssl rand -hex 32`) and `ALLOWED_EMAIL`, the one Google account
+  permitted to sign in.
+
+Provision the DB:
+
+```shell
+npm run db:up
+```
+
+Create the test database (a separate, disposable database the test suite runs against — see
 [`docs/project-plan.md`](docs/project-plan.md) §7):
 
 ```shell
 docker compose exec postgres createdb -U $POSTGRES_USER my_places_test
 ```
 
-To run the migrations (both the main and test databases):
+Run the migrations (both the main and test databases):
 
 ```shell
 npm run migrate -w @my-places/api -- up
@@ -63,17 +78,26 @@ npm run migrate:test -w @my-places/api -- up
 
 Provided the DB is already running:
 
-To run web and api:
-`npm run dev`
+```shell
+npm run dev
+```
+
+Confirm it's working:
+
+- Web: <http://localhost:5173/>
+- API health: <http://localhost:3000/health>
+- API health, with DB connectivity: <http://localhost:3000/db-health>
+
+Sign-in is gated to a single Google account — visiting the web app redirects straight to Google's sign-in flow, and
+only the address set as `ALLOWED_EMAIL` can complete it.
 
 ## Checks
 
-To run the local checks:
-`npm run check`
+Run formatting, linting, type-checking, and the test suite together:
 
-Is web reachable at http://localhost:5173/
-Is API responding at http://localhost:3000/health
-Is API responding with DB live at: http://localhost:3000/db-health
+```shell
+npm run check
+```
 
 ## How to export your saved places
 
@@ -81,9 +105,15 @@ Is API responding with DB live at: http://localhost:3000/db-health
 2. Click "Deselect all", then check just "Saved".
 3. Continue through the export options (file type .zip, default size limit is way more than enough for this).
 4. Create the export — Google emails you when it's done.
-5. Download and unzip it. Inside you'll find a Takeout/Saved/ folder containing csv files for all your saved lists.
-6. Drop the desired csv files in the uploads folder.
-7. Run the import command to load them into the app.
+5. Download and unzip it. Inside you'll find a Takeout/Saved/ folder containing CSV files for all your saved lists.
+6. Some files may be unrelated to Maps Saved Places. Discard them.
+
+## How to import your saved places
+
+**Option 1 — from the web app:** drag and drop the desired CSV files onto the file-drop area. Each file is imported
+under its own filename as the list/category name, independent of any other list already imported.
+
+**Option 2 — from the command line:** drop the desired CSV files into `uploads/places/`, then run:
 
 ```shell
 npm run import -w @my-places/api
