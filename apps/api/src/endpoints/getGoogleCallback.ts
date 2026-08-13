@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendAuthErrorPage } from "../auth/authErrorPage";
 import { verifyGoogleAuthCode } from "../auth/googleOAuth";
 import {
   createSessionToken,
@@ -14,9 +15,7 @@ export async function getGoogleCallback(
 ): Promise<void> {
   const code = req.query.code;
   if (typeof code !== "string") {
-    res
-      .status(400)
-      .json({ status: "error", message: "Missing authorization code" });
+    sendAuthErrorPage(res, 401, "Something went wrong completing sign-in.");
     return;
   }
 
@@ -25,7 +24,7 @@ export async function getGoogleCallback(
     identity = await verifyGoogleAuthCode(code);
   } catch (err) {
     logger.error({ err }, "Google OAuth code exchange failed");
-    res.status(401).json({ status: "error", message: "Sign-in failed" });
+    sendAuthErrorPage(res, 401, "Something went wrong completing sign-in.");
     return;
   }
 
@@ -34,7 +33,11 @@ export async function getGoogleCallback(
       { email: identity.email },
       "Rejected sign-in from non-allowlisted email",
     );
-    res.status(403).json({ status: "error", message: "Not authorized" });
+    sendAuthErrorPage(
+      res,
+      403,
+      "This app is restricted to a single Google account, and this isn't it.",
+    );
     return;
   }
 
