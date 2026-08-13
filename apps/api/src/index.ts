@@ -8,6 +8,7 @@ import { getGoogleLogin } from "./endpoints/getGoogleLogin";
 import { getHealth } from "./endpoints/getHealth";
 import { getDbHealth } from "./endpoints/getDbHealth";
 import { getPlaces } from "./endpoints/getPlaces";
+import { postImport } from "./endpoints/postImport";
 import { postLogout } from "./endpoints/postLogout";
 
 const app = express();
@@ -23,6 +24,7 @@ app.get("/auth/google/callback", getGoogleCallback);
 app.post("/auth/logout", postLogout);
 
 app.get("/places", requireAuth, getPlaces);
+app.post("/import", requireAuth, express.json({ limit: "5mb" }), postImport);
 
 app.listen(port, () => {
   logger.info(`API listening on http://localhost:${port}`);

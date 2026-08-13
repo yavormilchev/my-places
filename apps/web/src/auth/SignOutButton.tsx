@@ -6,10 +6,6 @@ export function SignOutButton() {
       type="button"
       onClick={() => void logout()}
       style={{
-        position: "fixed",
-        top: "0.75rem",
-        right: "1rem",
-        zIndex: 10,
         display: "inline-flex",
         alignItems: "center",
         padding: "0.35rem 0.85rem",

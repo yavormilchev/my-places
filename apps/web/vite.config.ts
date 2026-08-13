@@ -15,6 +15,7 @@ export default defineConfig({
       "/places": "http://localhost:3000",
       "/health": "http://localhost:3000",
       "/auth": "http://localhost:3000",
+      "/import": "http://localhost:3000",
     },
   },
 });

@@ -1,13 +1,15 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseSavedListCsv } from "./parseSavedListCsv";
 import { fixturePath } from "../testSupport/fixtures";
 
+function fixtureContent(name: string): string {
+  return readFileSync(fixturePath("places", name), "utf-8");
+}
+
 describe("parseSavedListCsv", () => {
-  it("parses CSV file returning all non-header rows", () => {
-    const result = parseSavedListCsv(
-      fixturePath("places", "Coffee.csv"),
-      "Coffee",
-    );
+  it("parses CSV content returning all non-header rows", () => {
+    const result = parseSavedListCsv(fixtureContent("Coffee.csv"), "Coffee");
 
     expect(result).toEqual([
       {
@@ -30,16 +32,13 @@ describe("parseSavedListCsv", () => {
   });
 
   it("can parse an empty file", () => {
-    const result = parseSavedListCsv(
-      fixturePath("places", "Empty.csv"),
-      "Empty",
-    );
+    const result = parseSavedListCsv(fixtureContent("Empty.csv"), "Empty");
 
     expect(result).toEqual([]);
   });
 
   it("can parse a 0-places file", () => {
-    const result = parseSavedListCsv(fixturePath("places", "Zero.csv"), "Zero");
+    const result = parseSavedListCsv(fixtureContent("Zero.csv"), "Zero");
 
     expect(result).toEqual([]);
   });

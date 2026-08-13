@@ -6,11 +6,11 @@ import type { RawSavedPlace } from "../import/parseSavedListCsv";
 import { resetDb } from "../testSupport/resetDb";
 import { syncPlaces } from "./syncPlaces";
 
-function rawPlace(seed: number): RawSavedPlace {
+function rawPlace(seed: number, listName = "Coffee"): RawSavedPlace {
   const hexA = `0x${(1_000_000 + seed).toString(16).padStart(16, "0")}`;
   const hexB = `0x${(2_000_000 + seed).toString(16).padStart(16, "0")}`;
   return {
-    listName: "Coffee",
+    listName,
     title: `Place ${seed}`,
     note: "",
     url: `https://www.google.com/maps/place/Place+${seed}/data=!4m2!3m1!1s${hexA}:${hexB}`,
@@ -115,6 +115,34 @@ describe("syncPlaces", () => {
 
     expect(remainingIds).not.toContain(enriched1.placeId);
     expect(remainingIds).toContain(enriched2.placeId);
+    expect(result).toEqual({ saved: 1, deleted: 1 });
+  });
+
+  it("importing one list doesn't touch places from a different list, even absent ones", async () => {
+    const coffeePlace = rawPlace(1, "Coffee");
+    const oldFoodPlace = rawPlace(2, "Food");
+    const newFoodPlace = rawPlace(3, "Food");
+    const enrichedCoffee = enrichedPlace(coffeePlace);
+    const enrichedOldFood = enrichedPlace(oldFoodPlace);
+    const enrichedNewFood = enrichedPlace(newFoodPlace);
+
+    // both lists exist from a prior full import
+    await syncPlaces(
+      [coffeePlace, oldFoodPlace],
+      [enrichedCoffee, enrichedOldFood],
+    );
+
+    // this run only re-uploads Food.csv, and oldFoodPlace is genuinely gone
+    // from it, replaced by newFoodPlace — Coffee's place must survive
+    // untouched, since Coffee.csv wasn't part of this run at all
+    const result = await syncPlaces([newFoodPlace], [enrichedNewFood]);
+
+    const { rows } = await pool.query("select place_id from places");
+    const remainingIds = rows.map((r) => r.place_id);
+
+    expect(remainingIds).toContain(enrichedCoffee.placeId);
+    expect(remainingIds).toContain(enrichedNewFood.placeId);
+    expect(remainingIds).not.toContain(enrichedOldFood.placeId);
     expect(result).toEqual({ saved: 1, deleted: 1 });
   });
 

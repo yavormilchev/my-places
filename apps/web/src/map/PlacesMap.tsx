@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Map,
   Marker,
@@ -16,6 +16,7 @@ import { fetchPlaces } from "./fetchPlaces";
 import { redirectToLogin, UnauthorizedError } from "../auth/auth";
 import { CategoryFilter } from "./CategoryFilter";
 import { SignOutButton } from "../auth/SignOutButton";
+import { ImportDropZone } from "../import/ImportDropZone";
 import { emojiForCategory } from "./categoryEmoji";
 import { emojiMarkerIconUrl } from "./emojiMarkerIcon";
 
@@ -50,21 +51,12 @@ export function PlacesMap() {
     new Set(),
   );
 
-  // Fires once after the map settles from a pan or zoom — not continuously
-  // during the interaction. Always fetched unfiltered by category so toggling
-  // a checkbox doesn't need a round trip.
-  const handleIdle = useCallback((event: MapEvent) => {
-    const center = event.map.getCenter();
-    const bounds = event.map.getBounds();
-    if (!center || !bounds) return;
+  // The center/bounds query only exists inside handleIdle's event — kept
+  // here too so a completed import can re-run the same fetch afterward,
+  // without needing a live handle on the underlying map instance.
+  const lastQueryRef = useRef<PlacesQuery | null>(null);
 
-    const centerCoords: Coordinates = { lat: center.lat(), lng: center.lng() };
-    const query: PlacesQuery = {
-      ...centerCoords,
-      radiusMiles: radiusMilesFromBounds(centerCoords, bounds),
-      categories: [],
-    };
-
+  const refetchPlaces = useCallback((query: PlacesQuery) => {
     fetchPlaces(query)
       .then(setPlaces)
       .catch((err: unknown) => {
@@ -75,6 +67,35 @@ export function PlacesMap() {
         console.error("Failed to fetch places", err);
       });
   }, []);
+
+  // Fires once after the map settles from a pan or zoom — not continuously
+  // during the interaction. Always fetched unfiltered by category so toggling
+  // a checkbox doesn't need a round trip.
+  const handleIdle = useCallback(
+    (event: MapEvent) => {
+      const center = event.map.getCenter();
+      const bounds = event.map.getBounds();
+      if (!center || !bounds) return;
+
+      const centerCoords: Coordinates = {
+        lat: center.lat(),
+        lng: center.lng(),
+      };
+      const query: PlacesQuery = {
+        ...centerCoords,
+        radiusMiles: radiusMilesFromBounds(centerCoords, bounds),
+        categories: [],
+      };
+
+      lastQueryRef.current = query;
+      refetchPlaces(query);
+    },
+    [refetchPlaces],
+  );
+
+  const handleImported = useCallback(() => {
+    if (lastQueryRef.current) refetchPlaces(lastQueryRef.current);
+  }, [refetchPlaces]);
 
   const toggleCategory = useCallback((category: string) => {
     setExcludedCategories((prev) => {
@@ -103,7 +124,19 @@ export function PlacesMap() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <SignOutButton />
+      <div
+        style={{
+          position: "fixed",
+          top: "0.75rem",
+          right: "1rem",
+          zIndex: 10,
+          display: "flex",
+          gap: "0.5rem",
+        }}
+      >
+        <ImportDropZone onImported={handleImported} />
+        <SignOutButton />
+      </div>
       <CategoryFilter
         categories={availableCategories}
         excluded={excludedCategories}

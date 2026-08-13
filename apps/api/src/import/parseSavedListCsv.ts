@@ -1,4 +1,3 @@
-import * as fs from "node:fs";
 import { parse } from "csv-parse/sync";
 
 export interface RawSavedPlace {
@@ -18,13 +17,18 @@ interface CsvSavedPlace {
   Comment: string;
 }
 
+/**
+ * Takes raw CSV text rather than a file path — this is what lets the same
+ * parser serve both the CLI import (reads the file itself, see import.ts)
+ * and the browser-upload endpoint (already has the content in memory from
+ * the request body, never writes it to disk at all).
+ */
 export function parseSavedListCsv(
-  filePath: string,
+  content: string,
   listName: string,
 ): RawSavedPlace[] {
   try {
-    const fileContent = fs.readFileSync(filePath, "utf-8");
-    const records = parse<CsvSavedPlace>(fileContent, {
+    const records = parse<CsvSavedPlace>(content, {
       columns: true,
       skip_empty_lines: true,
     });
@@ -39,7 +43,7 @@ export function parseSavedListCsv(
         comment: r.Comment,
       }));
   } catch (err) {
-    throw new Error(`Could not parse saved-places CSV: ${filePath}`, {
+    throw new Error(`Could not parse saved-places CSV for list: ${listName}`, {
       cause: err,
     });
   }
