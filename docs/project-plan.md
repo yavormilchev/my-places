@@ -7,12 +7,11 @@ by radius and category.
 
 ## 1. What we're building
 
-| Feature             | Notes                                                        |
-| ------------------- | ------------------------------------------------------------ |
-| Google sign-in      | Standard OAuth 2.0 authorization code flow                   |
-| Import saved places | Via Takeout file upload (v1) → Data Portability API (v2)     |
-| Radius filter       | "Show me saved places within X miles of my current location" |
-| Category filter     | Restaurant / cafe / park / etc. — needs enrichment, see §3   |
+| Feature         | Notes                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Google sign-in  | Standard OAuth 2.0 authorization code flow                   |
+| Radius filter   | "Show me saved places within X miles of my current location" |
+| Category filter | Restaurant / cafe / park / etc. — needs enrichment, see §3   |
 
 Single-user by nature. No scaling concerns, no complex domain modelling.
 
@@ -23,7 +22,7 @@ Single-user by nature. No scaling concerns, no complex domain modelling.
 **There is no Google Maps API that returns a user's saved places.** This is the single most important thing to know
 before starting. Every "import my saved places" product works around it.
 
-### Option A — Google Takeout file upload (start here)
+### Option A — Google Takeout file upload
 
 Two different Takeout products are involved, and they are **not interchangeable** — this tripped up the first attempt:
 
@@ -52,8 +51,7 @@ separate resolution step:
 
 **Strategy:** wrap coordinate + category resolution behind a swappable boundary (`enrichPlace`/`enrichPlaces` in
 `apps/api/src/data-enrichment/`) — paid off in practice, not just in theory: it's what let scraping get tried and
-rejected without touching anything downstream. Same principle as the Takeout → Data Portability swap below, one
-level down.
+rejected without touching anything downstream.
 
 **How it actually resolves a place, once Places API was the answer:** the Feature ID isn't directly usable as API
 input — no documented endpoint converts it to a `place_id`. Reverse-engineered instead, by decoding real Place IDs:
@@ -64,7 +62,9 @@ real places, not just that the decoding math lined up. One Place Details Essenti
 
 No OAuth, no verification, no API cost for the CSV export itself. Good enough to build everything else on.
 
-### Option B — Google Data Portability API (the real version)
+### Option B — Google Data Portability API (abandoned)
+
+**UPDATE:** It turns out the Data Portability API is not available for US accounts.
 
 Google's official OAuth-based export API. This is what your original idea described, and it does exist.
 
@@ -84,8 +84,8 @@ Google's official OAuth-based export API. This is what your original idea descri
 2. **It's asynchronous.** The flow is `initiate job → poll for state → download
 archive`. Not a simple request/response. This is the most interesting backend piece in the whole project.
 
-**Strategy:** build the parser once against Takeout files, then swap the _source_
-for the Data Portability API later. Same downstream code.
+**Strategy:** The plan was to build the parser once against Takeout files, then swap the _source_ for the Data
+Portability API later. Same downstream code.
 
 Docs: <https://developers.google.com/data-portability/schema-reference/local_actions>
 
@@ -132,20 +132,6 @@ hundred rows is good enough (it is, at this scale).
 
 Two processes, two `package.json` files, one repo.
 
-### Why not Next.js
-
-- It's a _frontend_ framework that runs server code. It hides routing, middleware ordering, and server lifecycle —
-  exactly the layer this project needs direct control over.
-- The Data Portability poller needs a **long-lived process**. Route handlers are request/response shaped and common
-  deployment targets time out at 10–60s.
-- Debugging becomes "is this Next or me?"
-
-Next has a real place for a frontend-heavy app — just not this one.
-
-### Why not Nuxt
-
-Nuxt is Vue. Not applicable.
-
 ### Why Express over Fastify
 
 Fastify is technically the better greenfield choice — native TypeScript generics, built-in JSON Schema validation,
@@ -154,11 +140,9 @@ for a single-user app.
 
 Express 5 wins here because:
 
-- You already know it. Novelty budget is finite and this project spends it on OAuth, async jobs, rate limiting, and
-  geospatial queries.
+- You already know it.
 - Enormous tutorial and Stack Overflow corpus.
 - v5 fixed the worst v4 wart: proper async/await error propagation.
-- Choosing your own logger / validator / error handler is itself educational.
 
 ### Why not NestJS
 
@@ -175,7 +159,7 @@ to absorb alongside everything else.
 
 ## 6. Build order
 
-Each step ships something that works. That matters more than it sounds.
+Each step ships something that works.
 
 1. **✅ Parse Takeout "Saved" CSVs into Postgres**, resolving each place's coordinates and category through the
    swappable resolver (§2), backed by Places API. Built as a CLI script (`npm run import`). Re-imports fully
@@ -183,15 +167,14 @@ Each step ships something that works. That matters more than it sounds.
    longer in it — not just insert-and-forget.
 2. **✅ Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
 3. **✅ React frontend with a map.** Now you have something to look at.
-4. **Google sign-in.** Auth only — OAuth flow, token storage, refresh handling.
-5. **Replace file upload with the Data Portability API.** Job table, poller, archive download, idempotent re-import.
+4. **✅ Google sign-in.** Auth only — OAuth flow.
+5. **Drop "Saved" CSVs in the UI** so no one needs to load files on the server.
 
 ---
 
-## 7. Backend concepts covered
+## 7. Backend concepts used
 
-- OAuth 2.0 authorization code flow, token storage, refresh handling
-- Async job orchestration (initiate → poll → download)
+- OAuth 2.0 authorization code flow
 - Third-party rate limits, caching, and cost control
 - **Idempotent, reconciling imports** — running twice must not duplicate rows (upsert on place ID), and removing a
   place from the export should remove it from the table too, without treating "failed to resolve this run" the same
@@ -205,7 +188,7 @@ Each step ships something that works. That matters more than it sounds.
   come from — paid off directly: scraping was tried, found broken, and swapped for Places API without touching
   anything downstream
 
-**Deliberately out of scope:** real concurrency, horizontal scaling, complex domain modelling — not needed for a
+**Deliberately out of scope:** real concurrency, horizontal scaling, complex domain modeling — not needed for a
 single-user app.
 
 ---
@@ -233,5 +216,3 @@ single-user app.
 - Coordinate/category resolution via Places API is free at single-user volume (Place Details Essentials: first
   10,000 calls/month free, $5.00/1,000 after). Cache aggressively regardless; never re-resolve a place already in
   `places` — that's what keeps it free as the place count grows.
-- Express 5 changed wildcard route syntax and query parsing from v4 — old tutorials may not copy-paste cleanly.
-- Data Portability API testing mode caps you at a limited number of test users.

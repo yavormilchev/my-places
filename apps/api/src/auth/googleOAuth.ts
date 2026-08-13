@@ -10,7 +10,9 @@ const client = new OAuth2Client(
 export function getGoogleAuthorizationUrl(): string {
   return client.generateAuthUrl({
     // We only need to confirm identity once, not call Google APIs on the
-    // user's behalf later — no refresh token, no offline access.
+    // user's behalf later — no refresh token, no offline access. The
+    // Data Portability API would have needed that, but it's unavailable
+    // for US accounts!
     access_type: "online",
     scope: ["openid", "email"],
     prompt: "select_account",
