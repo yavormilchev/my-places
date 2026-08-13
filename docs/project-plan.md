@@ -66,7 +66,7 @@ No OAuth, no verification, no API cost for the CSV export itself. Good enough to
 
 **UPDATE:** It turns out the Data Portability API is not available for US accounts.
 
-Google's official OAuth-based export API. This is what your original idea described, and it does exist.
+Google's official OAuth-based export API. This was the original idea, and it does exist.
 
 - Resource group: `maps.starred_places`
 - Scope: `https://www.googleapis.com/auth/dataportability.maps.starred_places`
@@ -79,8 +79,7 @@ Google's official OAuth-based export API. This is what your original idea descri
 **Two catches:**
 
 1. **Verification.** These are sensitive/restricted scopes, so a public app must pass Google's app verification. For a
-   personal project you stay in _testing_
-   mode with your own account added as a test user.
+   personal project we can stay in _testing_ mode with a single account added as a test user.
 2. **It's asynchronous.** The flow is `initiate job → poll for state → download
 archive`. Not a simple request/response. This is the most interesting backend piece in the whole project.
 
@@ -166,9 +165,9 @@ Each step ships something that works.
    reconcile the table against the current export — upserts everything present, and deletes rows for places no
    longer in it — not just insert-and-forget.
 2. **✅ Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
-3. **✅ React frontend with a map.** Now you have something to look at.
+3. **✅ React frontend with a map.** Now we have something to look at.
 4. **✅ Google sign-in.** Auth only — OAuth flow.
-5. **Drop "Saved" CSVs in the UI** so no one needs to load files on the server.
+5. **✅ Drop "Saved" CSVs in the UI** so no one needs to load files on the server.
 
 ---
 
