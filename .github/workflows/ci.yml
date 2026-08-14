@@ -17,7 +17,7 @@ jobs:
       GOOGLE_PLACES_SERVER_SIDE_API_KEY: "INVALID"
       GOOGLE_OAUTH_CLIENT_ID: "INVALID"
       GOOGLE_OAUTH_CLIENT_SECRET: "INVALID"
-      GOOGLE_OAUTH_REDIRECT_URI: "http://localhost:3000/auth/google/callback"
+      GOOGLE_OAUTH_REDIRECT_URI: "http://localhost:3000/api/auth/google/callback"
       WEB_APP_URL: "http://localhost:5173"
       ALLOWED_EMAIL: "INVALID"
       SESSION_SECRET: "test-secret"

@@ -8,14 +8,10 @@ export default defineConfig({
   // real .env lives at the monorepo root, two levels up from apps/web.
   envDir: path.resolve(import.meta.dirname, "../.."),
   server: {
-    // Dev-only convenience so the browser calls same-origin `/places` etc.
-    // instead of hitting the API's port directly — avoids needing CORS
-    // middleware on the API for what's currently a same-machine dev setup.
+    // Dev-only convenience so the browser calls same-origin `/api/*` instead
+    // of hitting the API's port directly — avoids needing CORS middleware.
     proxy: {
-      "/places": "http://localhost:3000",
-      "/health": "http://localhost:3000",
-      "/auth": "http://localhost:3000",
-      "/import": "http://localhost:3000",
+      "/api": "http://localhost:3000",
     },
   },
 });

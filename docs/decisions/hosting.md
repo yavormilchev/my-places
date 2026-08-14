@@ -98,15 +98,11 @@ doesn't need any of them.
 
 ---
 
-## Status
+## Step-by-step approach
 
-| Task                                                                      | Status     |
-| ------------------------------------------------------------------------- | ---------- |
-| Google OAuth sign-in, session cookie, single-account allowlist            | ✅ Done    |
-| Production build pipeline (`esbuild` bundle, `build`/`start` scripts)     | ✅ Done    |
-| Provision the Lightsail instance; harden it (SSH keys only, firewall)     | ⬜ Planned |
-| Install Node, nginx, certbot                                              | ⬜ Planned |
-| Postgres/PostGIS via `docker-compose.yml` (with the `5432` binding fixed) | ⬜ Planned |
-| nginx config (static `/places/`, reverse-proxied `/places/api/`) + TLS    | ⬜ Planned |
-| Rate limiting + `fail2ban`                                                | ⬜ Planned |
-| Point DNS at the new box                                                  | ⬜ Planned |
+1. Provision the Lightsail instance; harden it (SSH keys only, firewall)
+2. Install Node, nginx, certbot
+3. Postgres/PostGIS via `docker-compose.yml` (with the `5432` binding fixed)
+4. nginx config (static `/places/`, reverse-proxied `/places/api/`) + TLS
+5. Rate limiting + `fail2ban`
+6. Point DNS at the new box

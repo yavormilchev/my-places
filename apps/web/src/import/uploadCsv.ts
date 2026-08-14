@@ -14,7 +14,7 @@ export async function uploadCsv(file: File): Promise<ImportResult> {
   const content = await file.text();
   const listName = file.name.replace(/\.csv$/i, "");
 
-  const response = await fetch("/import", {
+  const response = await fetch("/api/import", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ listName, content }),
