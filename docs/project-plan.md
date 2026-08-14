@@ -164,7 +164,7 @@ Each step ships something that works.
    swappable resolver (§2), backed by Places API. Built as a CLI script (`npm run import`). Re-imports fully
    reconcile the table against the current export — upserts everything present, and deletes rows for places no
    longer in it — not just insert-and-forget.
-2. **✅ Radius + category filtering as a query API.** `GET /places?lat=&lng=&radius=&category=`
+2. **✅ Radius + category filtering as a query API.** `GET /api/places?lat=&lng=&radius=&category=`
 3. **✅ React frontend with a map.** Now we have something to look at.
 4. **✅ Google sign-in.** Auth only — OAuth flow.
 5. **✅ Drop "Saved" CSVs in the UI** so no one needs to load files on the server.

@@ -16,15 +16,24 @@ const port = env.port;
 
 app.use(cookieParser());
 
-app.get("/health", getHealth);
-app.get("/db-health", getDbHealth);
+const apiRouter = express.Router();
 
-app.get("/auth/google", getGoogleLogin);
-app.get("/auth/google/callback", getGoogleCallback);
-app.post("/auth/logout", postLogout);
+apiRouter.get("/health", getHealth);
+apiRouter.get("/db-health", getDbHealth);
 
-app.get("/places", requireAuth, getPlaces);
-app.post("/import", requireAuth, express.json({ limit: "5mb" }), postImport);
+apiRouter.get("/auth/google", getGoogleLogin);
+apiRouter.get("/auth/google/callback", getGoogleCallback);
+apiRouter.post("/auth/logout", postLogout);
+
+apiRouter.get("/places", requireAuth, getPlaces);
+apiRouter.post(
+  "/import",
+  requireAuth,
+  express.json({ limit: "5mb" }),
+  postImport,
+);
+
+app.use("/api", apiRouter);
 
 app.listen(port, () => {
   logger.info(`API listening on http://localhost:${port}`);

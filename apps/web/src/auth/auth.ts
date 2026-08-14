@@ -1,5 +1,5 @@
-const LOGIN_PATH = "/auth/google";
-const LOGOUT_PATH = "/auth/logout";
+const LOGIN_PATH = "/api/auth/google";
+const LOGOUT_PATH = "/api/auth/logout";
 
 /**
  * Thrown when the API rejects a request as unauthenticated — distinct from

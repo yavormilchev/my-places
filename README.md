@@ -85,8 +85,8 @@ npm run dev
 Confirm it's working:
 
 - Web: <http://localhost:5173/>
-- API health: <http://localhost:3000/health>
-- API health, with DB connectivity: <http://localhost:3000/db-health>
+- API health: <http://localhost:3000/api/health>
+- API health, with DB connectivity: <http://localhost:3000/api/db-health>
 
 Sign-in is gated to a single Google account — visiting the web app redirects straight to Google's sign-in flow, and
 only the address set as `ALLOWED_EMAIL` can complete it.

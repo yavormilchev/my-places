@@ -13,7 +13,7 @@ export async function fetchPlaces(
     params.append("category", category);
   }
 
-  const response = await fetch(`/places?${params}`);
+  const response = await fetch(`/api/places?${params}`);
   if (response.status === 401) {
     throw new UnauthorizedError();
   }

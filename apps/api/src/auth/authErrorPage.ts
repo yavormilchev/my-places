@@ -51,7 +51,7 @@ export function sendAuthErrorPage(
     <main>
       <h1>Sign-in failed</h1>
       <p>${message}</p>
-      <p><a href="/auth/google">Try again</a></p>
+      <p><a href="/api/auth/google">Try again</a></p>
     </main>
   </body>
 </html>
