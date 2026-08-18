@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { sendAuthErrorPage } from "../auth/authErrorPage";
-import { verifyGoogleAuthCode } from "../auth/googleOAuth";
+import { verifyGoogleAuthCode, type GoogleIdentity } from "../auth/googleOAuth";
 import {
   createSessionToken,
   SESSION_COOKIE_NAME,
@@ -8,6 +8,7 @@ import {
 } from "../auth/session";
 import { env } from "../config";
 import { logger } from "../logger";
+import { upsertUser } from "../persistence/upsertUser";
 
 export async function getGoogleCallback(
   req: Request,
@@ -19,7 +20,7 @@ export async function getGoogleCallback(
     return;
   }
 
-  let identity: { email: string };
+  let identity: GoogleIdentity;
   try {
     identity = await verifyGoogleAuthCode(code);
   } catch (err) {
@@ -28,7 +29,7 @@ export async function getGoogleCallback(
     return;
   }
 
-  if (identity.email.toLowerCase() !== env.allowedEmail.toLowerCase()) {
+  if (!env.allowedEmails.includes(identity.email.toLowerCase())) {
     logger.warn(
       { email: identity.email },
       "Rejected sign-in from non-allowlisted email",
@@ -36,12 +37,17 @@ export async function getGoogleCallback(
     sendAuthErrorPage(
       res,
       403,
-      "This app is restricted to a single Google account, and this isn't it.",
+      "This app is restricted to a specific set of Google accounts, and this isn't one of them.",
     );
     return;
   }
 
-  const token = createSessionToken({ email: identity.email });
+  await upsertUser(identity.sub, identity.email);
+
+  const token = createSessionToken({
+    userId: identity.sub,
+    email: identity.email,
+  });
   res.cookie(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: env.isProduction,

@@ -1,13 +1,10 @@
 # Hosting & Deployment
 
-**Status:** Auth and the production build pipeline are implemented. Infrastructure provisioning (the rest of this
-document) is designed but not yet deployed — see the checklist at the bottom for exactly what's done versus planned.
-
 ---
 
 ## Goals
 
-This is a single-user personal project with no revenue and no scaling requirements — the deployment strategy
+This is a personal project with no revenue and no scaling requirements — the deployment strategy
 optimizes for **cost, simplicity, and direct control over every layer of the stack** rather than for the kind of
 resilience or scale a multi-tenant product would need. A real security posture anyway, because "no scale" doesn't
 mean "no stakes": the app displays personal saved-places data and sits on the open internet.
@@ -21,7 +18,7 @@ mean "no stakes": the app displays personal saved-places data and sits on the op
 **AWS Lightsail** over provisioning EC2 directly. Both give a real Ubuntu box configured by hand — nginx, systemd,
 certbot, no platform abstraction in between — the difference is in the networking layer underneath. EC2 requires
 owning VPC design, security groups, and Elastic IP association from scratch; for a single instance serving a
-single-user app, that's overhead with no corresponding benefit. Lightsail bundles a static IP and a simplified
+personal use app, that's overhead with no corresponding benefit. Lightsail bundles a static IP and a simplified
 firewall by default, at a fixed monthly cost, while leaving everything above the network layer identical to EC2.
 
 ### One box, path-based routing
@@ -66,15 +63,15 @@ trusting a clean compile.
 Lightsail's firewall permits exactly three ports: 22 (SSH), 80, 443. SSH is key-only — password authentication is
 disabled at the OS level, not just discouraged.
 
-### Application layer: Google OAuth, scoped to one identity
+### Application layer: Google OAuth, scoped to a few identities
 
-Authentication here isn't a general-purpose multi-user auth system — it's an access gate scoped to exactly one
-Google account, because this is a single-user app displaying one person's saved-places data. Sign-in uses the
-standard OAuth 2.0 authorization code flow; the callback checks the returned email against a single allow-listed
-address before issuing anything.
+Authentication here isn't a general-purpose multi-user auth system — it's an access gate scoped to a few
+Google accounts, because this is a gated app displaying a few people's saved-places data. Sign-in uses the
+standard OAuth 2.0 authorization code flow; the callback checks the returned email against an allow-list of
+addresses before issuing anything.
 
 The session itself is a signed, `httpOnly`, `Secure`, `SameSite=Lax` cookie — deliberately not a database-backed
-session, since a single-user app has no meaningful session-invalidation requirement beyond "let it expire." No
+session, since a personal use app has no meaningful session-invalidation requirement beyond "let it expire." No
 password ever exists inside this app's own trust boundary; Google's own sign-in page is the only place one is ever
 entered, which removes the classic credential-brute-force target entirely rather than just rate-limiting it.
 
@@ -93,7 +90,7 @@ Layered rather than single-point:
 ## Deliberately out of scope
 
 Horizontal scaling, load balancing, a managed database (RDS), a CDN, and zero-downtime deploys are all explicitly
-not part of this design — not because they're hard, but because a single-user app with no uptime SLA and no revenue
+not part of this design — not because they're hard, but because a personal use app with no uptime SLA and no revenue
 doesn't need any of them.
 
 ---

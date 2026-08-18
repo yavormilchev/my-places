@@ -27,7 +27,9 @@ export async function postImport(req: Request, res: Response): Promise<void> {
   }
 
   try {
-    const result = await runImport(places);
+    // requireAuth (this route's middleware) always sets this before next()
+    const userId = req.userId!;
+    const result = await runImport(userId, places);
     logger.info({ listName, ...result }, "Import complete");
     res.json({ status: "ok", ...result });
   } catch (err) {

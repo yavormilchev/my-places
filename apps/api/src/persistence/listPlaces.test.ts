@@ -2,9 +2,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { EnrichedPlace } from "../data-enrichment/enrichPlace";
 import { extractPlaceIdFromUrl } from "../data-enrichment/extractPlaceIdFromUrl";
 import type { RawSavedPlace } from "../import/parseSavedListCsv";
+import { insertTestUser } from "../testSupport/insertTestUser";
 import { resetDb } from "../testSupport/resetDb";
 import { listPlaces } from "./listPlaces";
 import { syncPlaces } from "./syncPlaces";
+
+const USER = "test-user";
 
 function rawPlace(seed: number): RawSavedPlace {
   const hexA = `0x${(1_000_000 + seed).toString(16).padStart(16, "0")}`;
@@ -33,17 +36,18 @@ function enrichedPlace(raw: RawSavedPlace): EnrichedPlace {
 describe("listPlaces", () => {
   beforeEach(async () => {
     await resetDb();
+    await insertTestUser(USER);
   });
 
   it("returns an empty array when the table is empty", async () => {
-    expect(await listPlaces()).toEqual([]);
+    expect(await listPlaces(USER)).toEqual([]);
   });
 
   it("returns every place, mapped to the API's Place shape", async () => {
     const raw = rawPlace(1);
-    await syncPlaces([raw], [enrichedPlace(raw)]);
+    await syncPlaces(USER, [raw], [enrichedPlace(raw)]);
 
-    const result = await listPlaces();
+    const result = await listPlaces(USER);
 
     expect(result).toEqual([
       {
@@ -58,5 +62,13 @@ describe("listPlaces", () => {
         savedAt: expect.any(String),
       },
     ]);
+  });
+
+  it("never returns another user's places", async () => {
+    const otherUser = await insertTestUser("other-user");
+    const raw = rawPlace(1);
+    await syncPlaces(otherUser, [raw], [enrichedPlace(raw)]);
+
+    expect(await listPlaces(USER)).toEqual([]);
   });
 });

@@ -19,7 +19,7 @@ jobs:
       GOOGLE_OAUTH_CLIENT_SECRET: "INVALID"
       GOOGLE_OAUTH_REDIRECT_URI: "http://localhost:3000/api/auth/google/callback"
       WEB_APP_URL: "http://localhost:5173"
-      ALLOWED_EMAIL: "INVALID"
+      ALLOWED_EMAILS: "INVALID"
       SESSION_SECRET: "test-secret"
     services:
       postgres:

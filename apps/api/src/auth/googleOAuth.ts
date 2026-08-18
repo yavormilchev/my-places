@@ -20,6 +20,8 @@ export function getGoogleAuthorizationUrl(): string {
 }
 
 export interface GoogleIdentity {
+  /** Google's stable, immutable identifier for the account */
+  sub: string;
   email: string;
   emailVerified: boolean;
 }
@@ -46,6 +48,7 @@ export async function verifyGoogleAuthCode(
   }
 
   return {
+    sub: payload.sub,
     email: payload.email,
     emailVerified: payload.email_verified ?? false,
   };

@@ -16,15 +16,16 @@ export interface RunImportOptions {
  * duplicating it.
  */
 export async function runImport(
+  userId: string,
   places: RawSavedPlace[],
   options: RunImportOptions = {},
 ): Promise<SyncResult> {
   let placesToResolve = places;
   if (!options.refresh) {
-    const existingPlaceIds = await getExistingPlaceIds();
+    const existingPlaceIds = await getExistingPlaceIds(userId);
     placesToResolve = filterUnresolvedPlaces(places, existingPlaceIds);
   }
 
   const resolved = await enrichPlaces(placesToResolve);
-  return syncPlaces(places, resolved);
+  return syncPlaces(userId, places, resolved);
 }
