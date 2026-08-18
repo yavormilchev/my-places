@@ -17,5 +17,6 @@ export function requireAuth(
     return;
   }
 
+  req.userId = session.userId;
   next();
 }

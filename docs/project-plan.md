@@ -7,13 +7,14 @@ by radius and category.
 
 ## 1. What we're building
 
-| Feature         | Notes                                                        |
-| --------------- | ------------------------------------------------------------ |
-| Google sign-in  | Standard OAuth 2.0 authorization code flow                   |
-| Radius filter   | "Show me saved places within X miles of my current location" |
-| Category filter | Restaurant / cafe / park / etc. — needs enrichment, see §3   |
+| Feature             | Notes                                                                      |
+| ------------------- | -------------------------------------------------------------------------- |
+| Google sign-in      | Standard OAuth 2.0 authorization code flow                                 |
+| Import saved places | Google Takeout CSV export, uploaded via drag-and-drop in the UI or the CLI |
+| Radius filter       | "Show me saved places within X miles of my current location"               |
+| Category filter     | Restaurant / cafe / park / etc. — needs enrichment, see §3                 |
 
-Single-user by nature. No scaling concerns, no complex domain modelling.
+Private project with locked access, no scaling concerns, no complex domain modeling.
 
 ---
 
@@ -79,7 +80,7 @@ Google's official OAuth-based export API. This was the original idea, and it doe
 **Two catches:**
 
 1. **Verification.** These are sensitive/restricted scopes, so a public app must pass Google's app verification. For a
-   personal project we can stay in _testing_ mode with a single account added as a test user.
+   personal project we can stay in _testing_ mode with a few accounts added as test users.
 2. **It's asynchronous.** The flow is `initiate job → poll for state → download
 archive`. Not a simple request/response. This is the most interesting backend piece in the whole project.
 
@@ -135,7 +136,7 @@ Two processes, two `package.json` files, one repo.
 
 Fastify is technically the better greenfield choice — native TypeScript generics, built-in JSON Schema validation,
 automatic async error handling, Pino logging out of the box. It's also 3–5x faster, which is **completely irrelevant**
-for a single-user app.
+for a personal use app.
 
 Express 5 wins here because:
 
@@ -168,6 +169,9 @@ Each step ships something that works.
 3. **✅ React frontend with a map.** Now we have something to look at.
 4. **✅ Google sign-in.** Auth only — OAuth flow.
 5. **✅ Drop "Saved" CSVs in the UI** so no one needs to load files on the server.
+6. **✅ Multi-user support.** A `users` table keyed on Google's stable `sub` claim, not email; every place, import,
+   and lookup scoped to the signed-in user; sign-in itself gated to a curated `ALLOWED_EMAILS` allowlist rather than
+   open to anyone.
 
 ---
 
@@ -188,7 +192,7 @@ Each step ships something that works.
   anything downstream
 
 **Deliberately out of scope:** real concurrency, horizontal scaling, complex domain modeling — not needed for a
-single-user app.
+personal use app.
 
 ---
 
@@ -212,6 +216,10 @@ single-user app.
   the current occupant — a saved place's `resolved_title` (from the API) can legitimately differ from `title` (what
   you saved it as), because the business changed, not because anything broke. Confirmed for real: one saved place
   came back under a completely different business name at the same address.
-- Coordinate/category resolution via Places API is free at single-user volume (Place Details Essentials: first
+- Coordinate/category resolution via Places API is free at personal-use volume (Place Details Essentials: first
   10,000 calls/month free, $5.00/1,000 after). Cache aggressively regardless; never re-resolve a place already in
   `places` — that's what keeps it free as the place count grows.
+- **Adding someone to `ALLOWED_EMAILS` isn't enough on its own.** The Google OAuth client is still in Testing
+  publishing status (never went through Google's verification), which independently caps sign-in to accounts
+  explicitly added as test users in Google Cloud Console. Two places to update, not one, when granting someone
+  access.

@@ -39,6 +39,7 @@ export interface SyncResult {
  * the touched list(s).
  */
 export async function syncPlaces(
+  userId: string,
   allPlaces: RawSavedPlace[],
   resolvedPlaces: EnrichedPlace[],
 ): Promise<SyncResult> {
@@ -65,8 +66,11 @@ export async function syncPlaces(
     await client.query("BEGIN");
 
     const { rowCount: deleted } = await client.query(
-      `delete from places where list_name = any($2::text[]) and place_id <> all($1::text[])`,
-      [currentPlaceIds, touchedListNames],
+      `delete from places
+       where user_id = $3
+         and list_name = any($2::text[])
+         and place_id <> all($1::text[])`,
+      [currentPlaceIds, touchedListNames, userId],
     );
 
     for (const place of resolvedPlaces) {
@@ -74,9 +78,9 @@ export async function syncPlaces(
         place.resolvedTitle === place.title ? null : place.resolvedTitle;
 
       await client.query(
-        `insert into places (place_id, title, resolved_title, list_name, url, lat, lng, types)
-         values ($1, $2, $3, $4, $5, $6, $7, $8)
-         on conflict (place_id) do update set
+        `insert into places (user_id, place_id, title, resolved_title, list_name, url, lat, lng, types)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         on conflict (user_id, place_id) do update set
            title = excluded.title,
            resolved_title = excluded.resolved_title,
            list_name = excluded.list_name,
@@ -85,6 +89,7 @@ export async function syncPlaces(
            lng = excluded.lng,
            types = excluded.types`,
         [
+          userId,
           place.placeId,
           place.title,
           resolvedTitle,

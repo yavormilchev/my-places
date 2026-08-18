@@ -15,7 +15,9 @@ export async function getPlaces(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const places = await listPlaces();
+  // requireAuth (this route's middleware) always sets this before next()
+  const userId = req.userId!;
+  const places = await listPlaces(userId);
   const withinRadius = filterByRadiusWithDistance(places, query);
   const result = filterByCategory(withinRadius, query.categories);
 
