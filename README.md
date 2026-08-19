@@ -1,3 +1,10 @@
+# Fun Fact
+
+This project was built before Google Maps updated their web UI to look similar — now showing constantly visible, large
+saved-places icons :) That update helps, but Google Maps still doesn't let you select multiple saved place categories to
+display at once — only one category at a time. That's not much help when you're trying to see everything nearby you
+might want to do.
+
 # My Places Explorer
 
 [![CI](https://github.com/yavormilchev/my-places/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yavormilchev/my-places/actions/workflows/ci.yml)
