@@ -123,40 +123,6 @@ hundred rows is good enough (it is, at this scale).
 
 ---
 
-## 5. Stack decisions
-
-```
-/api      Express 5 + TypeScript + Postgres (+ PostGIS)
-/web      Vite + React + TypeScript
-```
-
-Two processes, two `package.json` files, one repo.
-
-### Why Express over Fastify
-
-Fastify is technically the better greenfield choice — native TypeScript generics, built-in JSON Schema validation,
-automatic async error handling, Pino logging out of the box. It's also 3–5x faster, which is **completely irrelevant**
-for a personal use app.
-
-Express 5 wins here because:
-
-- You already know it.
-- Enormous tutorial and Stack Overflow corpus.
-- v5 fixed the worst v4 wart: proper async/await error propagation.
-
-### Why not NestJS
-
-Wraps Express anyway, adds Angular-style modules and dependency injection. Good architecture lessons, too much ceremony
-to absorb alongside everything else.
-
-### Background jobs
-
-- **v1:** `setInterval` reading a `jobs` table.
-- **When that gets annoying:** [pg-boss](https://github.com/timgit/pg-boss) — uses the Postgres you already have instead
-  of dragging in Redis.
-
----
-
 ## 6. Build order
 
 Each step ships something that works.
@@ -172,6 +138,7 @@ Each step ships something that works.
 6. **✅ Multi-user support.** A `users` table keyed on Google's stable `sub` claim, not email; every place, import,
    and lookup scoped to the signed-in user; sign-in itself gated to a curated `ALLOWED_EMAILS` allowlist rather than
    open to anyone.
+7. **Migrate to NestJs**
 
 ---
 
