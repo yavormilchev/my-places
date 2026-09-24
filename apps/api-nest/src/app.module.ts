@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ObserveModule } from './observe.js';
+import { AuthModule } from './auth/auth.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
 
@@ -12,6 +13,7 @@ import { HealthModule } from './health/health.module.js';
     }),
     DatabaseModule,
     HealthModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
